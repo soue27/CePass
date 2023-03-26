@@ -23,8 +23,7 @@ async def commands_start(message: types.Message) -> None:
     await bot.send_message(message.from_user.id, f'Доброго дня! {message.from_user.first_name} '
                                                  f'{message.from_user.last_name},'
                                                  f' Я помогу найти пароль к прибору учета СЕ. '
-                                                 f'Введите номер, можно не полностью',
-                           reply_markup=kb_client)
+                                                 f'Введите номер, можно не полностью',)
     await message.delete()
 
 
