@@ -30,6 +30,7 @@ async def commands_start(message: types.Message) -> None:
 # add 666666 777777 000000
 @dp.message_handler(filters.Text(startswith='add', ignore_case=True))
 async def search_by_number(message: types.Message):
+    # добавить проверку, что уже такой ПУ есть в базе
     pair = message.text.split()[1:3]
     if pair[0].isdigit() and pair[0].isdigit():
         try:
