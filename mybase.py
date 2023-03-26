@@ -1,17 +1,21 @@
 import sqlite3
+import os
 
 global connect, cursor
 
 
 async def open_db():
     global connect, cursor
-    connect = sqlite3.connect('sepass.sqlite3')
-    cursor = connect.cursor()
-    cursor.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='pass' ''')
-    if cursor.fetchone()[0] == 1:
-        print('База данных подключена')
+    if os.path.exists('sepass.sqlite3'):
+        connect = sqlite3.connect('sepass.sqlite3')
+        cursor = connect.cursor()
+        cursor.execute('''SELECT count(name) FROM sqlite_master WHERE type='table' AND name='pass' ''')
+        if cursor.fetchone()[0] == 1:
+            print('База данных подключена')
+        else:
+            print('что то пошло не так')
     else:
-        print('что то пошло не так')
+        print('что то пошло не так? обратитесь к разработчку, нет файла')
 
 
 def close_db():

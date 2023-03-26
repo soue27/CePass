@@ -29,7 +29,7 @@ async def commands_start(message: types.Message) -> None:
     await message.delete()
 
 
-# add 33вава33 111111 000000
+# add 666666 777777 000000
 @dp.message_handler(filters.Text(startswith='add', ignore_case=True))
 async def search_by_number(message: types.Message):
     pair = message.text.split()[1:3]
@@ -51,14 +51,17 @@ async def search_by_number(message: types.Message):
 
 @dp.message_handler(lambda message: message.text.isdigit())
 async def search_by_number(message: types.Message):
-    passw = mybase.search_by_number(message.text)
-    if passw:
-        for qw in passw:
-            await message.reply(
-                f'№ ПУ <b>{qw[0]} </b>\n'
-                f'Пароль <b>{qw[1]} </b>\n', parse_mode='HTML')
-    else:
-        await message.reply(f'Пароль для прибора учета <b>{message.text}</b> отсутствует', parse_mode='HTML')
+    try:
+        passw = mybase.search_by_number(message.text)
+        if passw:
+            for qw in passw:
+                await message.reply(
+                    f'№ ПУ <b>{qw[0]} </b>\n'
+                    f'Пароль <b>{qw[1]} </b>\n', parse_mode='HTML')
+        else:
+            await message.reply(f'Пароль для прибора учета <b>{message.text}</b> отсутствует', parse_mode='HTML')
+    except:
+        await message.reply('ошибка базы данных, обратитесь к разработчику')
 
 
 async def on_shutdown(_):
