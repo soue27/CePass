@@ -2,7 +2,6 @@ from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher, filters
 from aiogram.utils import executor
 from aiogram.types import ContentType, Message
-from keyboard import kb_client
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import config
@@ -51,6 +50,7 @@ async def search_by_number(message: types.Message):
 
 @dp.message_handler(lambda message: message.text.isdigit())
 async def search_by_number(message: types.Message):
+    print(message.from_user.first_name, message.from_user.last_name, message.from_user.id)
     try:
         passw = mybase.search_by_number(message.text)
         if passw:
