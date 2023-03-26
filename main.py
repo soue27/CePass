@@ -1,5 +1,5 @@
 from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher, FSMContext
+from aiogram.dispatcher import Dispatcher, filters
 from aiogram.utils import executor
 from aiogram.types import ContentType, Message
 from keyboard import kb_client
@@ -28,21 +28,30 @@ async def commands_start(message: types.Message) -> None:
     await message.delete()
 
 
-@dp.message_handler(content_types=['text'])
+@dp.message_handler(filters.Text(startswith='add', ignore_case=True))
 async def search_by_number(message: types.Message):
     print(message.text)
-    if not message.text.isdigit():
-        await message.reply('Вы ввели не правильный номер')
-    else:
-        await message.reply(message.text)
+    await message.reply('Можно добавлять номер и пароль')
+
+
+@dp.message_handler(lambda message: not message.text.isdigit())
+async def search_by_number(message: types.Message):
+    print(message.text)
+    await message.reply('Вы ввели не правильный номер')
+
+
+@dp.message_handler(lambda message: message.text.isdigit())
+async def search_by_number(message: types.Message):
+    print(message.text)
+    await message.reply('Вы ввели правильный номер')
 
 
 async def on_shutdown(_):
     await bot.send_message(317076591, "Бот отключился, надо что то делать")
 
-
+# , on_startup=on_startup, on_shutdown=on_shutdown
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)
+    executor.start_polling(dp, skip_updates=True)
 
 
 
