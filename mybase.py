@@ -1,9 +1,12 @@
 import sqlite3
 import os
+from loguru import logger
 
 global connect, cursor
+# logger.add("base.log", format="{time} {level} {message}", level="DEBUG", rotation="1 week", compression="zip")
 
 
+@logger.catch
 async def open_db():
     global connect, cursor
     if os.path.exists('sepass.sqlite3'):
@@ -14,8 +17,10 @@ async def open_db():
             print('База данных подключена')
         else:
             print('что то пошло не так')
+            # logger.error("нет таблицы в базе данных")
     else:
         print('что то пошло не так? обратитесь к разработчку, нет файла')
+        # logger.error("нет файла с базой данных")
 
 
 def close_db():
