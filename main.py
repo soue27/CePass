@@ -11,7 +11,8 @@ import mybase
 storage = MemoryStorage()
 bot = Bot(config.BotToken)
 dp = Dispatcher(bot, storage=MemoryStorage())
-logger.add("debug.log", format="{time} {level} {message}", level="DEBUG", rotation="1 week", compression="zip")
+logger.add("debug.log", format="{time} {level} {message}",
+           level="DEBUG", rotation="1 week", compression="zip")
 
 
 async def on_startup(_):
@@ -59,13 +60,18 @@ async def search_by_number(message: types.Message):
 async def search_by_number(message: types.Message):
     try:
         passw = mybase.search_by_number(message.text)
+        a = len(passw)
         if passw:
             logger.info(f'{message.from_user.first_name} {message.from_user.last_name} {message.from_user.id}'
                         f' нашел что искал')
-            for qw in passw:
-                await message.reply(
-                    f'№ ПУ <b>{qw[0]} </b>\n'
-                    f'Пароль <b>{qw[1]} </b>\n', parse_mode='HTML')
+            if len(passw) < 10:
+                for qw in passw:
+                    await message.reply(
+                        f'№ ПУ <b>{qw[0]} </b>\n'
+                        f'Пароль <b>{qw[1]} </b>\n', parse_mode='HTML')
+            else:
+                await message.reply(f'Выявлено больше 10 ПУ с номером <b>{message.text}</b> '
+                                        f'уточните номер', parse_mode='HTML')
         else:
             await message.reply(f'Пароль для прибора учета <b>{message.text}</b> отсутствует', parse_mode='HTML')
     except:
