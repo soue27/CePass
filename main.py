@@ -36,7 +36,7 @@ async def commands_start(message: types.Message) -> None:
 async def search_by_number(message: types.Message):
     # добавить проверку, что уже такой ПУ есть в базе
     pair = message.text.split()[1:3]
-    if pair[0].isdigit() and pair[0].isdigit():
+    if pair[0].isdigit() and len(pair[0]) > 7 and pair[0].isdigit() and not mybase.search_by_number(message.text):
         try:
             mybase.add_to_bd(pair)
         except:
@@ -46,7 +46,10 @@ async def search_by_number(message: types.Message):
             await message.reply('данные добавлены')
             logger.info("Данные добавлены")
     else:
-        await message.reply('ошибка во вводе данных')
+        await message.reply(f'Ошибка: \n'
+                            f'В номере и пароле введены не только цифры \n'
+                            f'Введен короткий номер (менее 7 цифр) \n'
+                            f'Прибор учета с таким номером уже есть в базе')
         logger.info("Ошибка ввода пользователя")
 
 
@@ -60,7 +63,6 @@ async def search_by_number(message: types.Message):
 async def search_by_number(message: types.Message):
     try:
         passw = mybase.search_by_number(message.text)
-        a = len(passw)
         if passw:
             logger.info(f'{message.from_user.first_name} {message.from_user.last_name} {message.from_user.id}'
                         f' нашел что искал')
@@ -71,7 +73,7 @@ async def search_by_number(message: types.Message):
                         f'Пароль <b>{qw[1]} </b>\n', parse_mode='HTML')
             else:
                 await message.reply(f'Выявлено больше 10 ПУ с номером <b>{message.text}</b> '
-                                        f'уточните номер', parse_mode='HTML')
+                                    f'уточните номер', parse_mode='HTML')
         else:
             await message.reply(f'Пароль для прибора учета <b>{message.text}</b> отсутствует', parse_mode='HTML')
     except:
