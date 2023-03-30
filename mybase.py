@@ -55,11 +55,12 @@ def add_fromfile():
     if ws.max_column - ws.min_column >= 1:
         for i in range(ws.min_row, ws.max_row + 1):
             if str(ws.cell(i, ws.min_column).value).isdigit() and str(ws.cell(i, ws.min_column + 1).value).isdigit():
+                print('добавляем строку', i)
                 cursor.execute("INSERT INTO pass VALUES (?, ?);",
                                (ws.cell(i, ws.min_column).value, ws.cell(i, ws.min_column + 1).value))
+                connect.commit()
             else:
                 error_count += 1
-        connect.commit()
     else:
         return 0, 0
     return ws.max_row - ws.min_row + 1 - error_count, error_count

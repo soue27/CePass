@@ -7,7 +7,6 @@ from aiogram.utils import executor
 from loguru import logger
 
 
-
 bot = Bot(config.BotToken)
 dp = Dispatcher(bot)
 logger.add("debug.log", format="{time} {level} {message}",
