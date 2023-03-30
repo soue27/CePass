@@ -1,23 +1,21 @@
 import os
-
+import config
+import mybase
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher, filters
 from aiogram.utils import executor
-from aiogram.types import ContentType, Message
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from loguru import logger
-import config
-import mybase
 
-storage = MemoryStorage()
+
+
 bot = Bot(config.BotToken)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot)
 logger.add("debug.log", format="{time} {level} {message}",
            level="DEBUG", rotation="1 week", compression="zip")
 
 
 async def on_startup(_):
+    """При запуске бота: Записывается лог, Открывается БД, сообщение разработчику"""
     print('Готов к работе! Данные обновлены')
     logger.info("Успешный запуск")
     await bot.send_message(317076591, "Готов к работе! Данные обновлены")
@@ -26,6 +24,8 @@ async def on_startup(_):
 
 @dp.message_handler(commands=['start', 'help'])
 async def commands_start(message: types.Message) -> None:
+    """Обработка команд старт и хелп
+    Пользователю выводится справочная информация"""
     await bot.send_message(message.from_user.id, f'Доброго дня! {message.from_user.first_name} '
                                                  f'{message.from_user.last_name},'
                                                  f' Я помогу найти пароль к прибору учета СЕ. '
@@ -33,10 +33,17 @@ async def commands_start(message: types.Message) -> None:
     await message.delete()
 
 
-# add 666666 777777 000000
+@dp.message_handler(lambda message: not message.text.isdigit())
+async def wrong_number(message: types.Message):
+    """Обработка неправильно введенного номера ПУ"""
+    await message.reply('Вы ввели неправильный номер')
+    logger.info("Ошибка ввода номера пользователем")
+
+
 @dp.message_handler(filters.Text(startswith='add', ignore_case=True))
 async def add(message: types.Message):
-    # добавить проверку, что уже такой ПУ есть в базе
+    """Добавление пары номер ПУ - пароль в БД
+    Проверяется подключение к БД, правильность введенного номера и пароля"""
     pair = message.text.split()[1:3]
     if pair[0].isdigit() and len(pair[0]) > 7 and pair[0].isdigit() and not mybase.search_by_number(message.text):
         try:
@@ -55,14 +62,11 @@ async def add(message: types.Message):
         logger.info("Ошибка ввода пользователя")
 
 
-@dp.message_handler(lambda message: not message.text.isdigit())
-async def wrong_number(message: types.Message):
-    await message.reply('Вы ввели неправильный номер')
-    logger.info("Ошибка ввода номера пользователем")
-
-
 @dp.message_handler(lambda message: message.text.isdigit())
 async def search_by_number(message: types.Message):
+    """Поиск пары номер ПУ - пароль в БД
+    Проверяется подключение к БД, правильность введенного номера и пароля
+    Записываются логи, при большом количества найденных номеров > 10 предлагается увеличить длину строки поиска"""
     try:
         passw = mybase.search_by_number(message.text)
         if passw:
@@ -85,19 +89,28 @@ async def search_by_number(message: types.Message):
 
 @dp.message_handler(content_types='document')
 async def my_file(message: types.Message) -> None:
+    """Загрузка файла в БД
+    Получаются реквизиты файла, сохраняются на диск, запускается функция добавления данных в БД
+    Результата логируется
+    Если функция add_fromfile() возращает 0, то пользователю выводится сообщение о неверном формате файла"""
     file_id = message.document.file_id
     file = await bot.get_file(file_id)
     file_path = file.file_path
     await bot.download_file(file_path, 'files\\forload.xlsx')
     count, error = mybase.add_fromfile()
+    logger.info(f'{message.from_user.first_name} {message.from_user.last_name} {message.from_user.id}'
+                f' загрузил файл')
     if count != 0:
-        await bot.send_message(message.from_user.id, f'Добавлено: {count} записей; {error} не записано (ошибки в номерах)')
+        await bot.send_message(message.from_user.id,
+                               f"Добавлено: {count} записей; {error} не записано (ошибки в номерах)")
     else:
         await bot.send_message(message.from_user.id, f'Не верный формат файла')
     os.remove('files\\forload.xlsx')
 
 
 async def on_shutdown(_):
+    """При остановке бота: Закрывается БД
+    направляется сообщение разработчику"""
     await bot.send_message(317076591, "Бот отключился, надо что то делать")
     mybase.close_db()
 
