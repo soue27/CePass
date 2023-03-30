@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher, filters
 from aiogram.utils import executor
@@ -33,7 +35,7 @@ async def commands_start(message: types.Message) -> None:
 
 # add 666666 777777 000000
 @dp.message_handler(filters.Text(startswith='add', ignore_case=True))
-async def search_by_number(message: types.Message):
+async def add(message: types.Message):
     # добавить проверку, что уже такой ПУ есть в базе
     pair = message.text.split()[1:3]
     if pair[0].isdigit() and len(pair[0]) > 7 and pair[0].isdigit() and not mybase.search_by_number(message.text):
@@ -54,7 +56,7 @@ async def search_by_number(message: types.Message):
 
 
 @dp.message_handler(lambda message: not message.text.isdigit())
-async def search_by_number(message: types.Message):
+async def wrong_number(message: types.Message):
     await message.reply('Вы ввели неправильный номер')
     logger.info("Ошибка ввода номера пользователем")
 
@@ -79,6 +81,20 @@ async def search_by_number(message: types.Message):
     except:
         await message.reply('ошибка базы данных, обратитесь к разработчику')
         logger.error("Ошибка с базой данных")
+
+
+@dp.message_handler(content_types='document')
+async def my_file(message: types.Message) -> None:
+    file_id = message.document.file_id
+    file = await bot.get_file(file_id)
+    file_path = file.file_path
+    await bot.download_file(file_path, 'files\\forload.xlsx')
+    count, error = mybase.add_fromfile()
+    if count != 0:
+        await bot.send_message(message.from_user.id, f'Добавлено: {count} записей; {error} не записано (ошибки в номерах)')
+    else:
+        await bot.send_message(message.from_user.id, f'Не верный формат файла')
+    os.remove('files\\forload.xlsx')
 
 
 async def on_shutdown(_):

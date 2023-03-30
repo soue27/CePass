@@ -1,6 +1,8 @@
 import sqlite3
 import os
+import sys
 from loguru import logger
+import openpyxl
 
 global connect, cursor
 # logger.add("base.log", format="{time} {level} {message}", level="DEBUG", rotation="1 week", compression="zip")
@@ -28,22 +30,22 @@ def close_db():
     connect.close()
 
 
-# async def create_db(base_name: str, spisok: list):
+# def create_db(spisok1: list):
 #     # Создание таблицы базы данных, на основании полученного списка из парсинга эксель файла.
 #     # На входе имя базы данных и список загрузки
-#     connect = sqlite3.connect(base_name)
+#     connect = sqlite3.connect('sepass.sqlite3')
 #     cursor = connect.cursor()
-#     cursor.execute('CREATE TABLE IF NOT EXISTS dis (contract, counterparty, city, point, street, house, tp)')
-#     sqlite_insert_query = """INSERT INTO dis
-#                                  (contract, counterparty, city, point, street, house, tp)
-#                                  VALUES (?, ?, ?, ?, ?, ?, ?);"""
-#     cursor.executemany(sqlite_insert_query, spisok)
+#     cursor.execute('CREATE TABLE IF NOT EXISTS pass (number, password)')
+#     sqlite_insert_query = """INSERT INTO pass
+#                                  (number, password)
+#                                  VALUES (?, ?)"""
+#     cursor.executemany(sqlite_insert_query, spisok1)
 #     connect.commit()
 #     connect.close()
 
 
 def search_by_number(number: str):
-    # Функция поиска по ноиеру прибора учета: str,
+    # Функция поиска по номеру прибора учета: str,
     results = cursor.execute(f"SELECT * FROM pass WHERE number LIKE '%{number.lower()}%'").fetchall()
     return results
 
@@ -53,3 +55,26 @@ def add_to_bd(newpass: list):
     cursor.execute("INSERT INTO pass VALUES (?, ?);",
                    (newpass[0], newpass[1]))
     connect.commit()
+
+
+def add_fromfile():
+    error_count = 0
+    try:
+        wb = openpyxl.load_workbook("files\\forload.xlsx")
+        ws = wb.active
+    except:
+        return 0, 0
+    if ws.max_column - ws.min_column >= 1:
+        for i in range(ws.min_row, ws.max_row + 1):
+                if str(ws.cell(i, ws.min_column).value).isdigit() and str(ws.cell(i, ws.min_column + 1).value).isdigit():
+                    cursor.execute("INSERT INTO pass VALUES (?, ?);", (ws.cell(i, ws.min_column).value, ws.cell(i, ws.min_column + 1).value))
+                else:
+                    error_count += 1
+        connect.commit()
+    else:
+        return 0, 0
+    return ws.max_row-ws.min_row + 1 - error_count, error_count
+
+
+if __name__ == '__main__':
+    print(add_fromfile())
