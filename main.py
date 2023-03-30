@@ -32,13 +32,6 @@ async def commands_start(message: types.Message) -> None:
     await message.delete()
 
 
-@dp.message_handler(lambda message: not message.text.isdigit())
-async def wrong_number(message: types.Message):
-    """Обработка неправильно введенного номера ПУ"""
-    await message.reply('Вы ввели неправильный номер')
-    logger.info("Ошибка ввода номера пользователем")
-
-
 @dp.message_handler(filters.Text(startswith='add', ignore_case=True))
 async def add(message: types.Message):
     """Добавление пары номер ПУ - пароль в БД
@@ -105,6 +98,13 @@ async def my_file(message: types.Message) -> None:
     else:
         await bot.send_message(message.from_user.id, f'Не верный формат файла')
     os.remove('files\\forload.xlsx')
+
+
+@dp.message_handler(lambda message: not message.text.isdigit())
+async def wrong_number(message: types.Message):
+    """Обработка неправильно введенного номера ПУ"""
+    await message.reply('Вы ввели неправильный номер')
+    logger.info("Ошибка ввода номера пользователем")
 
 
 async def on_shutdown(_):
