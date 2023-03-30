@@ -26,10 +26,10 @@ async def commands_start(message: types.Message) -> None:
     """Обработка команд старт и хелп
     Пользователю выводится справочная информация"""
     await bot.send_message(message.from_user.id, f'Доброго дня! {message.from_user.first_name} '
-                                                 f'{message.from_user.last_name},'
-                                                 f' Я помогу найти пароль к прибору учета СЕ. '
-                                                 f'Введите номер, можно не полностью'
-                                                 f'Чтобы добавить новый ПУ необходжимо написать команду'
+                                                 f'{message.from_user.last_name},\n'
+                                                 f' Я помогу найти пароль к прибору учета СЕ.\n '
+                                                 f'Для поиска введите номер, можно не полностью \n\n'
+                                                 f'Чтобы добавить новый ПУ необходжимо написать команду\n'
                                                  f'add номер пароль, через пробел')
 
     await message.delete()
