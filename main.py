@@ -29,7 +29,7 @@ async def commands_start(message: types.Message) -> None:
                                                  f'{message.from_user.last_name},\n'
                                                  f' Я помогу найти пароль к прибору учета СЕ.\n '
                                                  f'Для поиска введите номер, можно не полностью \n\n'
-                                                 f'Чтобы добавить новый ПУ необходжимо написать команду\n'
+                                                 f'Чтобы добавить новый ПУ необходимо написать команду\n'
                                                  f'add номер пароль, через пробел')
 
     await message.delete()
@@ -40,7 +40,7 @@ async def add(message: types.Message):
     """Добавление пары номер ПУ - пароль в БД
     Проверяется подключение к БД, правильность введенного номера и пароля"""
     pair = message.text.split()[1:3]
-    if pair[0].isdigit() and len(pair[0]) > 7 and pair[0].isdigit() and not mybase.search_by_number(message.text):
+    if pair[0].isdigit() and len(pair[0]) > 7 and pair[0].isdigit() and not mybase.search_by_number(pair[0]):
         try:
             mybase.add_to_bd(pair)
         except:
