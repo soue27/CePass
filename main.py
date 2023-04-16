@@ -31,6 +31,8 @@ async def commands_start(message: types.Message) -> None:
                                                  f'Для поиска введите номер, можно не полностью \n\n'
                                                  f'Чтобы добавить новый ПУ необходимо написать команду\n'
                                                  f'add номер пароль, через пробел')
+    logger.info(f'{message.from_user.first_name} {message.from_user.last_name} {message.from_user.id}'
+                f' подключился')
 
     await message.delete()
 
@@ -48,7 +50,8 @@ async def add(message: types.Message):
             logger.error("Ошибка с базой данных")
         finally:
             await message.reply('данные добавлены')
-            logger.info("Данные добавлены")
+            logger.info(f'{message.from_user.first_name} {message.from_user.last_name} {message.from_user.id}'
+                        f' загрузил данные')
     else:
         await message.reply(f'Ошибка: \n'
                             f'В номере и пароле введены не только цифры \n'
